@@ -3,13 +3,12 @@
 	"modid": "staminamod",
 	"name": "Stamina Mod",
 	"authors": [
-		"Joel Trauger",
-		"Claude (Anthropic) - Sonnet 5, implementation"
+		"traugdor"
 	],
-	"description": "Gives wild animals and players a stamina pool. Sprinting, fleeing and swimming drain it; once exhausted, animals slow down and predators give up the chase instead of pursuing prey (or the player) across the entire map. Predators are faster than vanilla until stamina drops below 80%, and hit harder to compensate for tiring out; injured deer get a one-time adrenaline speed burst until they fully heal. Players get a stamina pool too (about 4x a bear's), drained by sprinting and restored by resting or sleeping 3+ hours.",
-	"version": "2.0.0",
+	"description": "Gives wild animals and players a stamina pool. Sprinting, fleeing and swimming drain it; once exhausted, animals slow down and predators give up the chase instead of pursuing prey (or the player) across the entire map.",
+	"version": "1.0.0",
 	"dependencies": {
-		"game": "1.20.0"
+		"game": "1.22.0"
 	},
 	"website": ""
 }

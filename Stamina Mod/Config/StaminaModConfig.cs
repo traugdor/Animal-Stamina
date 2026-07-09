@@ -83,6 +83,9 @@ namespace StaminaMod.Config
         /// <summary>Below this fraction of max stamina, a player's sprint is forcibly cut off - too gassed to keep sprinting on will alone.</summary>
         public float PlayerSprintLockoutFraction = 0.08f;
 
+        /// <summary>If true and the "vigor" mod (a dedicated player stamina mod) is also installed and enabled, this mod's own player stamina is skipped - wildlife stamina is unaffected either way.</summary>
+        public bool DisablePlayerStaminaIfVigorPresent = true;
+
         public static StaminaModConfig LoadOrCreate(ICoreAPI api)
         {
             StaminaModConfig config;

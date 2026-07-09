@@ -47,6 +47,18 @@ This mod adds one, then compensates for the swing in difficulty in both directio
   flee (mirrors the predator give-up behavior). An already-in-progress escape is left to finish on
   its own - it's already slowed by the fatigue throttle - and the emergency "cornered" panic-flee
   response is untouched regardless of stamina, since that's a last-resort reflex, not a choice.
+- **Stamina bar.** Players get a small statbar stacked 10px above the vanilla health bar, styled
+  and positioned to match the vanilla HUD exactly (same width, same alignment math as the
+  health/oxygen/food bars) rather than looking bolted-on. Only appears if player stamina is
+  actually active for you.
+- **Player stamina can be turned off.** `EnablePlayerStamina: false` in the config disables the
+  player side of the mod entirely (no drain, no throttle, no HUD bar) while leaving wildlife
+  stamina untouched.
+- **Plays nice with Vigor.** If the [Vigor](https://mods.vintagestory.at/show/mod/26142) mod (a
+  dedicated player stamina/exertion mod) is also installed and enabled, this mod automatically
+  skips its own player stamina system to avoid two stamina pools/HUD bars fighting each other -
+  wildlife stamina is unaffected. Set `DisablePlayerStaminaIfVigorPresent: false` in the config if
+  you'd rather run both anyway.
 
 No vanilla files are overwritten - the mod attaches a new behavior to existing wild animal entity
 types via non-destructive JSON patches (and to players at runtime, since they aren't defined by an

@@ -136,6 +136,9 @@ namespace StaminaMod
             {
                 entity.WatchedAttributes.SetFloat("staminaModCurrent", maxStamina);
             }
+            // Synced separately from "staminaModCurrent" so the client-side HUD (which has no
+            // server-side config/formula to recompute this from) can read both values directly.
+            entity.WatchedAttributes.SetFloat("staminaModMax", maxStamina);
             if (panicModeEnabled && !entity.WatchedAttributes.HasAttribute("staminaModPanicAvailable"))
             {
                 entity.WatchedAttributes.SetBool("staminaModPanicAvailable", true);

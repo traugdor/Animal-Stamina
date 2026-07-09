@@ -14,6 +14,8 @@ namespace StaminaMod
         private const string HarmonyId = "staminamod";
 
         private Harmony harmony;
+        private ICoreServerAPI sapi;
+        private HudElementStamina staminaHud;
 
         public override void StartPre(ICoreAPI api)
         {
@@ -39,6 +41,12 @@ namespace StaminaMod
         public override void StartServerSide(ICoreServerAPI api)
         {
             base.StartServerSide(api);
+            sapi = api;
+
+            if (StaminaModConfig.Instance.DisablePlayerStaminaIfVigorPresent && api.ModLoader.IsModEnabled("vigor"))
+            {
+                api.Logger.Notification("[staminamod] Vigor detected - this mod's own player stamina is disabled (wildlife stamina is unaffected). Set DisablePlayerStaminaIfVigorPresent to false in the config to override.");
+            }
 
             // Wildlife gets the behavior via JSON patches on their entity type files (see
             // assets/staminamod/patches). Players aren't defined that way, so we attach it here
@@ -125,7 +133,12 @@ namespace StaminaMod
 
         private void OnPlayerNowPlaying(IServerPlayer player)
         {
-            if (!StaminaModConfig.Instance.EnablePlayerStamina)
+            StaminaModConfig cfg = StaminaModConfig.Instance;
+            if (!cfg.EnablePlayerStamina)
+            {
+                return;
+            }
+            if (cfg.DisablePlayerStaminaIfVigorPresent && sapi.ModLoader.IsModEnabled("vigor"))
             {
                 return;
             }
@@ -144,6 +157,7 @@ namespace StaminaMod
         public override void StartClientSide(ICoreClientAPI api)
         {
             base.StartClientSide(api);
+            staminaHud = new HudElementStamina(api);
         }
 
         public override void Dispose()
