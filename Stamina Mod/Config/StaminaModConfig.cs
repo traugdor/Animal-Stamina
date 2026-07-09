@@ -1,15 +1,15 @@
 using Vintagestory.API.Common;
 
-namespace AnimalStamina.Config
+namespace StaminaMod.Config
 {
     /// <summary>
     /// Global tuning knobs for the stamina system. Individual entity types can still
-    /// override a subset of these via the "animalStamina" attributes block added by
+    /// override a subset of these via the "staminaMod" attributes block added by
     /// this mod's entity patches (see EntityBehaviorStamina.Initialize).
     /// </summary>
-    public class AnimalStaminaConfig
+    public class StaminaModConfig
     {
-        public static AnimalStaminaConfig Instance = new AnimalStaminaConfig();
+        public static StaminaModConfig Instance = new StaminaModConfig();
 
         /// <summary>Stamina pool for a creature of ReferenceWeightKg. Bigger/smaller creatures scale from this.</summary>
         public float BaseMaxStamina = 100f;
@@ -56,23 +56,47 @@ namespace AnimalStamina.Config
         /// <summary>If true, an exhausted creature will still re-engage a target that recently attacked it (self-defense), even below GiveUpChaseFraction.</summary>
         public bool AllowRetaliationWhileExhausted = true;
 
-        public static AnimalStaminaConfig LoadOrCreate(ICoreAPI api)
+        /// <summary>Melee damage multiplier applied to any AI-controlled creature with a stamina pool, compensating for the new speed/chase limits.</summary>
+        public float MeleeDamageMultiplier = 1.2f;
+
+        /// <summary>Predator-tagged creatures move at PredatorHasteMultiplier speed while their stamina fraction is at/above this threshold.</summary>
+        public float PredatorHasteStaminaThreshold = 0.8f;
+
+        /// <summary>Flat speed multiplier predators get while fresh (stamina fraction >= PredatorHasteStaminaThreshold). Above vanilla speed.</summary>
+        public float PredatorHasteMultiplier = 1.15f;
+
+        /// <summary>Flat speed multiplier applied for PanicDurationSeconds when panic mode triggers (overrides the normal fatigue throttle - adrenaline over exhaustion).</summary>
+        public float PanicSpeedMultiplier = 1.45f;
+
+        /// <summary>How long a panic-mode speed burst lasts once triggered.</summary>
+        public float PanicDurationSeconds = 8f;
+
+        /// <summary>Whether players get a stamina pool at all.</summary>
+        public bool EnablePlayerStamina = true;
+
+        /// <summary>Player max stamina. Default is roughly 4x a black bear's stamina pool under the weight-scaling formula above.</summary>
+        public float PlayerMaxStamina = 630f;
+
+        /// <summary>Sleeping for at least this many in-game hours fully restores player stamina, on top of normal passive regen.</summary>
+        public float SleepHoursForFullRecharge = 3f;
+
+        public static StaminaModConfig LoadOrCreate(ICoreAPI api)
         {
-            AnimalStaminaConfig config;
+            StaminaModConfig config;
             try
             {
-                config = api.LoadModConfig<AnimalStaminaConfig>("AnimalStamina.json");
+                config = api.LoadModConfig<StaminaModConfig>("StaminaMod.json");
                 if (config == null)
                 {
-                    config = new AnimalStaminaConfig();
+                    config = new StaminaModConfig();
                 }
             }
             catch (System.Exception e)
             {
-                api.Logger.Error("[animalstamina] Failed to load config, using defaults: " + e);
-                config = new AnimalStaminaConfig();
+                api.Logger.Error("[staminamod] Failed to load config, using defaults: " + e);
+                config = new StaminaModConfig();
             }
-            api.StoreModConfig(config, "AnimalStamina.json");
+            api.StoreModConfig(config, "StaminaMod.json");
             Instance = config;
             return config;
         }

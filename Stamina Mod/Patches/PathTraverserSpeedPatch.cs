@@ -1,7 +1,7 @@
 using HarmonyLib;
 using Vintagestory.API.Common;
 
-namespace AnimalStamina.Patches
+namespace StaminaMod.Patches
 {
     /// <summary>
     /// Every AI movement entry point (wander, seek, flee, get-out-of-water, stay-close-to, ...)

@@ -1,6 +1,7 @@
-# Animal Stamina
+# Stamina Mod
 
-A [Vintage Story](https://www.vintagestory.at/) mod that gives wild animals a stamina pool.
+A [Vintage Story](https://www.vintagestory.at/) mod that gives wild animals *and* players a
+stamina pool.
 
 ## Why
 
@@ -10,35 +11,55 @@ blocks by an animal that never tires. The same goes in reverse: prey will flee f
 everything moves unrealistically fast while swimming. The player already manages this kind of
 trade-off through hunger drain while sprinting; animals had no equivalent limiter.
 
-This mod adds one.
+This mod adds one, then compensates for the swing in difficulty in both directions.
 
 ## What it does
 
-- Every patched wild animal gets a stamina pool (`EntityBehaviorStamina`), sized loosely by the
-  creature's weight (a moose gets more stamina to burn than a hare).
+**Core stamina system**
+
+- Every patched wild animal (and, optionally, players) gets a stamina pool
+  (`EntityBehaviorStamina`), sized loosely by the creature's weight - a moose gets more stamina to
+  burn than a hare.
 - Sprinting, fleeing, and swimming drain stamina. Wandering/foraging at normal pace does not.
-- As stamina drops below a threshold, the animal's movement speed is throttled - it doesn't stop,
-  it just can't keep sprinting indefinitely.
+- As stamina drops below a threshold, movement speed is throttled - it doesn't stop, it just can't
+  keep sprinting indefinitely.
 - Once stamina drops critically low, a chasing predator gives up and disengages instead of
   continuing to pursue (unless it was recently attacked and is defending itself, which is still
   allowed even while exhausted).
-- Stamina regenerates while the animal isn't exerting itself, after a short delay.
+- Stamina regenerates automatically while not exerting, after a short delay.
+
+**Compensation and extras**
+
+- **Predators hit harder.** Any AI-controlled attacker with a stamina pool deals bonus melee
+  damage, to offset the fact that it can no longer just run the target down forever.
+- **Predator haste.** Predator-tagged animals (wolf, bear, hyena, fox, raccoon) move *faster* than
+  vanilla while fresh - full speed bonus above 80% stamina, dropping back to normal at/below that
+  threshold, then throttling down like everything else as they tire further.
+- **Deer panic mode.** An injured deer gets a one-time adrenaline speed burst that overrides the
+  normal fatigue throttle for a few seconds. It can only trigger while injured, and won't be
+  available again until the deer heals back to full - no infinite panic-sprinting.
+- **Player stamina.** Players get a stamina pool too (about 4x a black bear's, by default),
+  drained by sprinting and throttled the same way animals are. It recharges passively at rest like
+  everything else, or can be fully restored by sleeping at least 3 in-game hours.
 
 No vanilla files are overwritten - the mod attaches a new behavior to existing wild animal entity
-types via non-destructive JSON patches, and uses [Harmony](https://harmony.pardeike.net/) patches
-to hook into the existing AI/pathing code at two points: the shared path-traversal speed
-calculation, and the predator "seek entity" task's give-up conditions. See the doc comments in
-`Patches/` for exactly which methods are hooked and why.
+types via non-destructive JSON patches (and to players at runtime, since they aren't defined by an
+entity type file the same way), and uses [Harmony](https://harmony.pardeike.net/) patches to hook
+into the existing AI/pathing/combat code at three points: the shared path-traversal speed
+calculation, the predator "seek entity" task's give-up conditions, and the melee attack damage
+calculation. See the doc comments in `Patches/` for exactly which methods are hooked and why.
 
 ## Configuration
 
-On first run the mod writes `ModConfig/AnimalStamina.json` with tunable defaults (drain/regen
-rates, speed thresholds, exhaustion/give-up fractions, etc). Individual entity types can also
-override any of these via an `"animalStamina"` attributes block if you want to hand-tune a
-specific creature.
+On first run the mod writes `ModConfig/StaminaMod.json` with tunable defaults (drain/regen rates,
+speed thresholds, exhaustion/give-up fractions, predator haste, panic burst, player pool size,
+sleep recharge threshold, etc). Individual entity types can also override most of these via a
+`"staminamod"` behavior attributes block if you want to hand-tune a specific creature - see
+`assets/staminamod/patches/wildlife-stamina.json` for how deer opt into panic mode this way.
 
-A `/animalstamina` server command (requires `controlserver` privilege) reports the stamina state
-of whatever entity you're looking at, for debugging/tuning.
+A `/staminamod` server command (requires `controlserver` privilege) reports the stamina state of
+whatever entity you're looking at, or your own if you aren't looking at anything with a stamina
+pool - handy for checking your own player stamina.
 
 ## Building
 
@@ -47,7 +68,7 @@ variable pointing at your Vintage Story install (this is how the official Mod Ma
 resolves game DLL references).
 
 ```
-dotnet build "Animal Stamina/Animal Stamina.csproj"
+dotnet build "Stamina Mod/Stamina Mod.csproj"
 ```
 
 or use the Cake build script for a distributable zip:

@@ -2,7 +2,7 @@ using HarmonyLib;
 using Vintagestory.API.Common;
 using Vintagestory.GameContent;
 
-namespace AnimalStamina.Patches
+namespace StaminaMod.Patches
 {
     /// <summary>
     /// Makes exhausted predators give up the chase instead of pursuing forever:
