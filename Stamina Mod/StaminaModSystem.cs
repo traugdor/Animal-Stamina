@@ -50,24 +50,77 @@ namespace StaminaMod
                 .WithDescription("Inspect the stamina of the entity you're looking at, or your own if you aren't looking at anything with a stamina pool")
                 .HandleWith(args =>
                 {
-                    Entity entity = args.Caller.Player?.CurrentEntitySelection?.Entity
-                        ?? args.Caller.Entity;
-                    if (entity == null)
+                    (Entity entity, EntityBehaviorStamina stamina, TextCommandResult error) = ResolveTarget(args);
+                    if (error != null)
                     {
-                        return TextCommandResult.Error("No entity to inspect.");
-                    }
-
-                    EntityBehaviorStamina stamina = entity.GetBehavior<EntityBehaviorStamina>();
-                    if (stamina == null)
-                    {
-                        return TextCommandResult.Error($"{entity.Code} does not have a stamina behavior.");
+                        return error;
                     }
 
                     return TextCommandResult.Success(
                         $"{entity.Code}: stamina {stamina.Stamina:0.#}/{stamina.MaxStamina:0.#} " +
                         $"({stamina.StaminaFraction * 100:0}%), speedFactor {stamina.SpeedFactor:0.00}, " +
                         $"exhausted: {stamina.IsExhausted}, panicking: {stamina.IsPanicking}");
-                });
+                })
+                .BeginSubCommand("set")
+                .WithDescription("Set the stamina of the entity you're looking at (or yourself) to an exact value")
+                .WithArgs(api.ChatCommands.Parsers.Float("value"))
+                .HandleWith(args =>
+                {
+                    (Entity entity, EntityBehaviorStamina stamina, TextCommandResult error) = ResolveTarget(args);
+                    if (error != null)
+                    {
+                        return error;
+                    }
+
+                    stamina.SetStamina((float)args.Parsers[0].GetValue());
+                    return TextCommandResult.Success($"{entity.Code} stamina set to {stamina.Stamina:0.#}/{stamina.MaxStamina:0.#}");
+                })
+                .EndSubCommand()
+                .BeginSubCommand("full")
+                .WithDescription("Fully refill the stamina of the entity you're looking at (or yourself)")
+                .HandleWith(args =>
+                {
+                    (Entity entity, EntityBehaviorStamina stamina, TextCommandResult error) = ResolveTarget(args);
+                    if (error != null)
+                    {
+                        return error;
+                    }
+
+                    stamina.SetStamina(stamina.MaxStamina);
+                    return TextCommandResult.Success($"{entity.Code} stamina fully refilled");
+                })
+                .EndSubCommand()
+                .BeginSubCommand("empty")
+                .WithDescription("Drain the stamina of the entity you're looking at (or yourself) to zero, for testing exhaustion/panic/give-up behavior")
+                .HandleWith(args =>
+                {
+                    (Entity entity, EntityBehaviorStamina stamina, TextCommandResult error) = ResolveTarget(args);
+                    if (error != null)
+                    {
+                        return error;
+                    }
+
+                    stamina.SetStamina(0f);
+                    return TextCommandResult.Success($"{entity.Code} stamina drained to 0");
+                })
+                .EndSubCommand();
+        }
+
+        private static (Entity entity, EntityBehaviorStamina stamina, TextCommandResult error) ResolveTarget(TextCommandCallingArgs args)
+        {
+            Entity entity = args.Caller.Player?.CurrentEntitySelection?.Entity ?? args.Caller.Entity;
+            if (entity == null)
+            {
+                return (null, null, TextCommandResult.Error("No entity to target."));
+            }
+
+            EntityBehaviorStamina stamina = entity.GetBehavior<EntityBehaviorStamina>();
+            if (stamina == null)
+            {
+                return (entity, null, TextCommandResult.Error($"{entity.Code} does not have a stamina behavior."));
+            }
+
+            return (entity, stamina, null);
         }
 
         private void OnPlayerNowPlaying(IServerPlayer player)

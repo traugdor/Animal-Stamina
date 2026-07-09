@@ -40,6 +40,7 @@ namespace StaminaMod
         private float panicSpeedMultiplier;
         private float panicDurationSeconds;
         private float sleepHoursForFullRecharge;
+        private float playerSprintLockoutFraction;
         private bool panicModeEnabled;
 
         private bool isPlayer;
@@ -77,6 +78,13 @@ namespace StaminaMod
 
         public EntityBehaviorStamina(Entity entity) : base(entity)
         {
+        }
+
+        /// <summary>Directly sets current stamina (clamped to [0, MaxStamina]). Used by the admin chat command.</summary>
+        public void SetStamina(float value)
+        {
+            Stamina = value;
+            RecomputeSpeedFactor();
         }
 
         public override string PropertyName() => BehaviorCode;
@@ -120,6 +128,7 @@ namespace StaminaMod
             panicDurationSeconds = attributes["panicDurationSeconds"].AsFloat(cfg.PanicDurationSeconds);
             panicModeEnabled = attributes["enablePanicMode"].AsBool(false);
             sleepHoursForFullRecharge = attributes["sleepHoursForFullRecharge"].AsFloat(cfg.SleepHoursForFullRecharge);
+            playerSprintLockoutFraction = attributes["playerSprintLockoutFraction"].AsFloat(cfg.PlayerSprintLockoutFraction);
 
             secondsSinceExertion = regenDelaySeconds + 1f;
 
@@ -191,6 +200,7 @@ namespace StaminaMod
             if (isPlayer)
             {
                 ApplyPlayerWalkspeedStat();
+                ApplySprintLockout();
             }
         }
 
@@ -269,6 +279,18 @@ namespace StaminaMod
             if (!currentValue.HasValue || Math.Abs(currentValue.Value - newValue) >= 0.01f)
             {
                 entity.Stats.Set("walkspeed", WalkspeedStatKey, newValue, persistent: false);
+            }
+        }
+
+        private void ApplySprintLockout()
+        {
+            if (StaminaFraction <= playerSprintLockoutFraction)
+            {
+                EntityAgent agent = entity as EntityAgent;
+                if (agent?.Controls != null)
+                {
+                    agent.Controls.Sprint = false;
+                }
             }
         }
 

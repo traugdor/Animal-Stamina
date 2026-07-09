@@ -80,6 +80,9 @@ namespace StaminaMod.Config
         /// <summary>Sleeping for at least this many in-game hours fully restores player stamina, on top of normal passive regen.</summary>
         public float SleepHoursForFullRecharge = 3f;
 
+        /// <summary>Below this fraction of max stamina, a player's sprint is forcibly cut off - too gassed to keep sprinting on will alone.</summary>
+        public float PlayerSprintLockoutFraction = 0.08f;
+
         public static StaminaModConfig LoadOrCreate(ICoreAPI api)
         {
             StaminaModConfig config;

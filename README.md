@@ -40,14 +40,21 @@ This mod adds one, then compensates for the swing in difficulty in both directio
   available again until the deer heals back to full - no infinite panic-sprinting.
 - **Player stamina.** Players get a stamina pool too (about 4x a black bear's, by default),
   drained by sprinting and throttled the same way animals are. It recharges passively at rest like
-  everything else, or can be fully restored by sleeping at least 3 in-game hours.
+  everything else, or can be fully restored by sleeping at least 3 in-game hours. Below ~8%
+  stamina, sprint is forcibly cut off - you can't will yourself into another burst on an empty
+  tank.
+- **Exhausted prey stop panicking too.** A critically gassed animal won't start a fresh voluntary
+  flee (mirrors the predator give-up behavior). An already-in-progress escape is left to finish on
+  its own - it's already slowed by the fatigue throttle - and the emergency "cornered" panic-flee
+  response is untouched regardless of stamina, since that's a last-resort reflex, not a choice.
 
 No vanilla files are overwritten - the mod attaches a new behavior to existing wild animal entity
 types via non-destructive JSON patches (and to players at runtime, since they aren't defined by an
 entity type file the same way), and uses [Harmony](https://harmony.pardeike.net/) patches to hook
-into the existing AI/pathing/combat code at three points: the shared path-traversal speed
-calculation, the predator "seek entity" task's give-up conditions, and the melee attack damage
-calculation. See the doc comments in `Patches/` for exactly which methods are hooked and why.
+into the existing AI/pathing/combat code at four points: the shared path-traversal speed
+calculation, the predator "seek entity" and prey "flee entity" tasks' give-up conditions, and the
+melee attack damage calculation. See the doc comments in `Patches/` for exactly which methods are
+hooked and why.
 
 ## Configuration
 
@@ -59,7 +66,8 @@ sleep recharge threshold, etc). Individual entity types can also override most o
 
 A `/staminamod` server command (requires `controlserver` privilege) reports the stamina state of
 whatever entity you're looking at, or your own if you aren't looking at anything with a stamina
-pool - handy for checking your own player stamina.
+pool - handy for checking your own player stamina. Subcommands `set <value>`, `full`, and `empty`
+let you force a specific stamina value on the same target, for testing or admin convenience.
 
 ## Building
 
