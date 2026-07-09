@@ -1,0 +1,15 @@
+{
+	"type": "code",
+	"modid": "animalstamina",
+	"name": "Animal Stamina",
+	"authors": [
+		"Joel Trauger",
+		"Claude (Anthropic) - Sonnet 5, implementation"
+	],
+	"description": "Gives wild animals a stamina pool. Sprinting, fleeing and swimming drain it; once exhausted, animals slow down and predators give up the chase to catch their breath instead of pursuing prey (or the player) across the entire map.",
+	"version": "1.0.0",
+	"dependencies": {
+		"game": "1.20.0"
+	},
+	"website": ""
+}

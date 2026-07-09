@@ -1,0 +1,152 @@
+[
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/wolf-adult.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/wolf-baby.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/bear-adult.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/fox-adult.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/fox-baby.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/hare-adult.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/hare-baby.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/hyena-adult.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/hyena-baby.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/raccoon-adult.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/raccoon-baby.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/hooved/deer-adult.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/hooved/deer-baby.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/hooved/elk-semitamed.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/hooved/elk-tamed.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/hooved/gazelle-adult.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/hooved/gazelle-baby.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/hooved/goat-adult.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/hooved/goat-baby.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/hooved/moose-adult.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/hooved/moose-baby.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/hooved/pig-adult.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/hooved/pig-baby.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/hooved/sheep-adult.json"
+	},
+	{
+		"op": "add",
+		"path": "/server/behaviors/-",
+		"value": { "code": "animalstamina" },
+		"file": "game:entities/animal/mammal/hooved/sheep-baby.json"
+	}
+]
