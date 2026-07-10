@@ -42,7 +42,8 @@ This mod adds one, then compensates for the swing in difficulty in both directio
   drained by sprinting and throttled the same way animals are. It recharges passively at rest like
   everything else, or can be fully restored by sleeping at least 3 in-game hours. Below ~8%
   stamina, sprint is forcibly cut off - you can't will yourself into another burst on an empty
-  tank.
+  tank. Eating fruit restores a bit of stamina on top of its normal saturation, tunable via
+  `FruitStaminaRechargePerSaturation` (0 disables it).
 - **Exhausted prey stop panicking too.** A critically gassed animal won't start a fresh voluntary
   flee (mirrors the predator give-up behavior). An already-in-progress escape is left to finish on
   its own - it's already slowed by the fatigue throttle - and the emergency "cornered" panic-flee

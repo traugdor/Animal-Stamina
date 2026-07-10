@@ -41,6 +41,7 @@ namespace StaminaMod
         private float panicDurationSeconds;
         private float sleepHoursForFullRecharge;
         private float playerSprintLockoutFraction;
+        private float fruitStaminaRechargePerSaturation;
         private bool panicModeEnabled;
 
         private bool isPlayer;
@@ -129,6 +130,7 @@ namespace StaminaMod
             panicModeEnabled = attributes["enablePanicMode"].AsBool(false);
             sleepHoursForFullRecharge = attributes["sleepHoursForFullRecharge"].AsFloat(cfg.SleepHoursForFullRecharge);
             playerSprintLockoutFraction = attributes["playerSprintLockoutFraction"].AsFloat(cfg.PlayerSprintLockoutFraction);
+            fruitStaminaRechargePerSaturation = attributes["fruitStaminaRechargePerSaturation"].AsFloat(cfg.FruitStaminaRechargePerSaturation);
 
             secondsSinceExertion = regenDelaySeconds + 1f;
 
@@ -204,6 +206,17 @@ namespace StaminaMod
             {
                 ApplyPlayerWalkspeedStat();
                 ApplySprintLockout();
+            }
+        }
+
+        /// <summary>Eating fruit restores a bit of stamina on top of the usual saturation gain (players only).</summary>
+        public override void OnEntityReceiveSaturation(float saturation, EnumFoodCategory foodCat = EnumFoodCategory.Unknown, float saturationLossDelay = 10f, float nutritionGainMultiplier = 1f)
+        {
+            base.OnEntityReceiveSaturation(saturation, foodCat, saturationLossDelay, nutritionGainMultiplier);
+
+            if (isPlayer && foodCat == EnumFoodCategory.Fruit && fruitStaminaRechargePerSaturation > 0f && saturation > 0f)
+            {
+                Stamina += saturation * fruitStaminaRechargePerSaturation;
             }
         }
 

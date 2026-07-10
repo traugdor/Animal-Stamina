@@ -86,6 +86,9 @@ namespace StaminaMod.Config
         /// <summary>If true and the "vigor" mod (a dedicated player stamina mod) is also installed and enabled, this mod's own player stamina is skipped - wildlife stamina is unaffected either way.</summary>
         public bool DisablePlayerStaminaIfVigorPresent = true;
 
+        /// <summary>Stamina restored per point of saturation gained from eating fruit (players only). 0 disables the effect.</summary>
+        public float FruitStaminaRechargePerSaturation = 0.25f;
+
         public static StaminaModConfig LoadOrCreate(ICoreAPI api)
         {
             StaminaModConfig config;
