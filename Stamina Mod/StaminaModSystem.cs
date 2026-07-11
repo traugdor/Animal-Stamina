@@ -134,17 +134,32 @@ namespace StaminaMod
         private void OnPlayerNowPlaying(IServerPlayer player)
         {
             StaminaModConfig cfg = StaminaModConfig.Instance;
-            if (!cfg.EnablePlayerStamina)
-            {
-                return;
-            }
-            if (cfg.DisablePlayerStaminaIfVigorPresent && sapi.ModLoader.IsModEnabled("vigor"))
+            bool disabled = !cfg.EnablePlayerStamina
+                || (cfg.DisablePlayerStaminaIfVigorPresent && sapi.ModLoader.IsModEnabled("vigor"));
+
+            Entity entity = player.Entity;
+            if (entity == null)
             {
                 return;
             }
 
-            Entity entity = player.Entity;
-            if (entity == null || entity.GetBehavior<EntityBehaviorStamina>() != null)
+            if (disabled)
+            {
+                // Player stamina is off, but they may have leftover synced attributes from a
+                // previous session where it was on (e.g. server admin just disabled it). Since we
+                // never attach the behavior in that case, nothing else would ever clear these -
+                // and the client HUD keys its visibility off "staminaModMax" existing at all, so a
+                // stale value here means a frozen stamina bar that refuses to disappear.
+                ITreeAttribute attrs = entity.WatchedAttributes;
+                if (attrs.HasAttribute("staminaModCurrent") || attrs.HasAttribute("staminaModMax"))
+                {
+                    attrs.RemoveAttribute("staminaModCurrent");
+                    attrs.RemoveAttribute("staminaModMax");
+                }
+                return;
+            }
+
+            if (entity.GetBehavior<EntityBehaviorStamina>() != null)
             {
                 return;
             }
