@@ -17,14 +17,23 @@ namespace StaminaMod
     /// client-side Entity object never has its own instance of it. Watched attributes sync
     /// regardless. If those attributes never appear (player stamina disabled, or Vigor detected
     /// and this mod deferring to it), the bar simply never composes and stays invisible.
+    ///
+    /// Shares its screen slot with the vanilla oxygen bar, so the two negotiate who gets to show:
+    /// see <see cref="UpdateOxygenConflict"/>.
     /// </summary>
     public class HudElementStamina : HudElement
     {
         private static readonly double[] StaminaBarColor = new double[4] { 0.85, 0.65, 0.13, 1.0 };
 
+        private const float TrendEpsilon = 0.01f;
+
         private float lastStamina = -1f;
         private float lastMaxStamina = -1f;
         private GuiElementStatbar staminaBar;
+
+        private float lastOxygenCurrent = float.NaN;
+        private float lastStaminaForTrend = float.NaN;
+        private bool hideForOxygen;
 
         public override double InputOrder => 1.0;
 
@@ -53,6 +62,9 @@ namespace StaminaMod
 
             float stamina = attrs.GetFloat("staminaModCurrent", 0f);
             float maxStamina = attrs.GetFloat("staminaModMax", 1f);
+
+            UpdateOxygenConflict(player, stamina);
+
             if (stamina == lastStamina && maxStamina == lastMaxStamina)
             {
                 return;
@@ -62,6 +74,42 @@ namespace StaminaMod
             staminaBar.SetValues(stamina, 0f, maxStamina);
             lastStamina = stamina;
             lastMaxStamina = maxStamina;
+        }
+
+        /// <summary>
+        /// The stamina and oxygen bars can never usefully occupy the same spot at once, so this
+        /// arbitrates between them every tick:
+        ///  - oxygen full (or no oxygen tree at all, i.e. never been underwater) - no contest,
+        ///    oxygen hides itself via HideWhenFull, stamina is free to show (subject to its own
+        ///    HideWhenFull if it's full too).
+        ///  - oxygen depleting (actively losing breath) - oxygen always wins, hide stamina.
+        ///  - oxygen refilling (just surfaced, not yet full) - oxygen wins UNLESS stamina is
+        ///    *also* actively draining right now, in which case stamina wins (you're mid-sprint
+        ///    the moment you catch your breath - more useful to keep watching stamina).
+        /// </summary>
+        private void UpdateOxygenConflict(IPlayer player, float staminaCurrent)
+        {
+            ITreeAttribute oxygenTree = player?.Entity?.WatchedAttributes?.GetTreeAttribute("oxygen");
+            float? oxygenCurrent = oxygenTree?.TryGetFloat("currentoxygen");
+            float? oxygenMax = oxygenTree?.TryGetFloat("maxoxygen");
+
+            bool oxygenFull = !oxygenCurrent.HasValue || !oxygenMax.HasValue
+                || oxygenCurrent.Value >= oxygenMax.Value - TrendEpsilon;
+
+            if (oxygenFull)
+            {
+                hideForOxygen = false;
+            }
+            else
+            {
+                bool oxygenDepleting = !float.IsNaN(lastOxygenCurrent) && oxygenCurrent.Value < lastOxygenCurrent - TrendEpsilon;
+                bool staminaDepleting = !float.IsNaN(lastStaminaForTrend) && staminaCurrent < lastStaminaForTrend - TrendEpsilon;
+
+                hideForOxygen = oxygenDepleting || !staminaDepleting;
+            }
+
+            lastOxygenCurrent = oxygenCurrent ?? float.NaN;
+            lastStaminaForTrend = staminaCurrent;
         }
 
         public void ComposeGuis()
@@ -91,6 +139,8 @@ namespace StaminaMod
                 .Compose();
 
             staminaBar = Composers["staminabar"].GetStatbar("staminastatbar");
+            // Same convention as vanilla's oxygen bar: don't clutter the HUD with a full bar.
+            staminaBar.HideWhenFull = true;
             TryOpen();
         }
 
@@ -106,25 +156,10 @@ namespace StaminaMod
 
         public override void OnRenderGUI(float deltaTime)
         {
-            if (capi.World.Player.WorldData.CurrentGameMode != EnumGameMode.Spectator && !IsOxygenBarVisible())
+            if (capi.World.Player.WorldData.CurrentGameMode != EnumGameMode.Spectator && !hideForOxygen)
             {
                 base.OnRenderGUI(deltaTime);
             }
-        }
-
-        // Vanilla's own oxygen bar sits in this exact HUD slot (HideWhenFull, shown while
-        // underwater/short of breath) - and you can't sprint underwater anyway, so there's
-        // nothing useful for the stamina bar to show while it'd be competing for the same spot.
-        private bool IsOxygenBarVisible()
-        {
-            ITreeAttribute oxygenTree = capi.World.Player?.Entity?.WatchedAttributes?.GetTreeAttribute("oxygen");
-            if (oxygenTree == null)
-            {
-                return false;
-            }
-            float? current = oxygenTree.TryGetFloat("currentoxygen");
-            float? max = oxygenTree.TryGetFloat("maxoxygen");
-            return current.HasValue && max.HasValue && current.Value < max.Value;
         }
 
         protected override void OnFocusChanged(bool on)
