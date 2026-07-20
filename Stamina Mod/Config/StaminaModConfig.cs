@@ -32,8 +32,11 @@ namespace StaminaMod.Config
         /// <summary>At/above this movement-speed value, stamina drains at the full rate - covers chasing/fleeing sprints.</summary>
         public float SprintSpeedThreshold = 0.045f;
 
-        /// <summary>Stamina points drained per second while sustaining a full sprint.</summary>
-        public float DrainPerSecondAtSprint = 9f;
+        /// <summary>Stamina points drained per second while an animal sustains a full sprint.</summary>
+        public float DrainPerSecondAtSprint = 4.5f;
+
+        /// <summary>Stamina points drained per second while a player sustains a full sprint. Separate from the animal rate so the two can be tuned independently.</summary>
+        public float PlayerDrainPerSecondAtSprint = 9f;
 
         /// <summary>Extra drain multiplier applied while swimming (predators shouldn't be able to swim forever either).</summary>
         public float SwimDrainMultiplier = 1.5f;
@@ -88,6 +91,18 @@ namespace StaminaMod.Config
 
         /// <summary>Stamina restored per point of saturation gained from eating fruit (players only). 0 disables the effect.</summary>
         public float FruitStaminaRechargePerSaturation = 0.25f;
+
+        /// <summary>Ambient temperature (Celsius) above which the hot-climate drain penalty kicks in.</summary>
+        public float HotClimateThresholdC = 28f;
+
+        /// <summary>Drain multiplier applied to animals while exerting in a hot climate. Four-legged animals cool themselves by panting and overheat fast.</summary>
+        public float AnimalHotClimateDrainMultiplier = 2f;
+
+        /// <summary>Drain multiplier applied to players while exerting in a hot climate. Humans cool via sweating and are comparatively good at enduring heat (persistence hunting), so this is much milder than the animal multiplier.</summary>
+        public float PlayerHotClimateDrainMultiplier = 1.15f;
+
+        /// <summary>How often (in seconds) to re-check ambient temperature. Climate queries aren't free, so this isn't checked every tick.</summary>
+        public float ClimateCheckIntervalSeconds = 3f;
 
         public static StaminaModConfig LoadOrCreate(ICoreAPI api)
         {

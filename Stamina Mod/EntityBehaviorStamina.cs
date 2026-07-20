@@ -28,6 +28,7 @@ namespace StaminaMod
         private float trotSpeedThreshold;
         private float sprintSpeedThreshold;
         private float drainPerSecondAtSprint;
+        private float playerDrainPerSecondAtSprint;
         private float swimDrainMultiplier;
         private float regenPerSecond;
         private float regenDelaySeconds;
@@ -42,12 +43,18 @@ namespace StaminaMod
         private float sleepHoursForFullRecharge;
         private float playerSprintLockoutFraction;
         private float fruitStaminaRechargePerSaturation;
+        private float hotClimateThresholdC;
+        private float animalHotClimateDrainMultiplier;
+        private float playerHotClimateDrainMultiplier;
+        private float climateCheckIntervalSeconds;
         private bool panicModeEnabled;
 
         private bool isPlayer;
         private bool isPredator;
 
         private float secondsSinceExertion;
+        private float secondsSinceClimateCheck;
+        private float climateDrainMultiplier = 1f;
 
         private bool panicActive;
         private long panicUntilMs;
@@ -116,6 +123,7 @@ namespace StaminaMod
             trotSpeedThreshold = attributes["trotSpeedThreshold"].AsFloat(cfg.TrotSpeedThreshold);
             sprintSpeedThreshold = attributes["sprintSpeedThreshold"].AsFloat(cfg.SprintSpeedThreshold);
             drainPerSecondAtSprint = attributes["drainPerSecondAtSprint"].AsFloat(cfg.DrainPerSecondAtSprint);
+            playerDrainPerSecondAtSprint = attributes["playerDrainPerSecondAtSprint"].AsFloat(cfg.PlayerDrainPerSecondAtSprint);
             swimDrainMultiplier = attributes["swimDrainMultiplier"].AsFloat(cfg.SwimDrainMultiplier);
             regenPerSecond = attributes["regenPerSecond"].AsFloat(cfg.RegenPerSecond);
             regenDelaySeconds = attributes["regenDelaySeconds"].AsFloat(cfg.RegenDelaySeconds);
@@ -131,8 +139,13 @@ namespace StaminaMod
             sleepHoursForFullRecharge = attributes["sleepHoursForFullRecharge"].AsFloat(cfg.SleepHoursForFullRecharge);
             playerSprintLockoutFraction = attributes["playerSprintLockoutFraction"].AsFloat(cfg.PlayerSprintLockoutFraction);
             fruitStaminaRechargePerSaturation = attributes["fruitStaminaRechargePerSaturation"].AsFloat(cfg.FruitStaminaRechargePerSaturation);
+            hotClimateThresholdC = attributes["hotClimateThresholdC"].AsFloat(cfg.HotClimateThresholdC);
+            animalHotClimateDrainMultiplier = attributes["animalHotClimateDrainMultiplier"].AsFloat(cfg.AnimalHotClimateDrainMultiplier);
+            playerHotClimateDrainMultiplier = attributes["playerHotClimateDrainMultiplier"].AsFloat(cfg.PlayerHotClimateDrainMultiplier);
+            climateCheckIntervalSeconds = attributes["climateCheckIntervalSeconds"].AsFloat(cfg.ClimateCheckIntervalSeconds);
 
             secondsSinceExertion = regenDelaySeconds + 1f;
+            secondsSinceClimateCheck = climateCheckIntervalSeconds;
 
             if (!entity.WatchedAttributes.HasAttribute("staminaModCurrent"))
             {
@@ -166,11 +179,14 @@ namespace StaminaMod
             // deltaTime can spike (lag, chunk loads); clamp so a single tick can't nuke or fully refill the pool.
             float dt = GameMath.Clamp(deltaTime, 0f, 0.5f);
 
+            UpdateClimateMultiplier(dt);
+
             float exertion = isPlayer ? GetPlayerExertion() : GetAnimalExertion();
 
             if (exertion > 0f)
             {
-                float drain = drainPerSecondAtSprint * exertion * (entity.Swimming ? swimDrainMultiplier : 1f) * dt;
+                float baseDrain = isPlayer ? playerDrainPerSecondAtSprint : drainPerSecondAtSprint;
+                float drain = baseDrain * exertion * (entity.Swimming ? swimDrainMultiplier : 1f) * climateDrainMultiplier * dt;
                 if (drain > 0f)
                 {
                     Stamina -= drain;
@@ -233,7 +249,32 @@ namespace StaminaMod
 
         private float GetPlayerExertion()
         {
-            return (entity as EntityAgent)?.Controls?.Sprint == true ? 1f : 0f;
+            EntityControls controls = (entity as EntityAgent)?.Controls;
+            // Sprint alone isn't enough - holding the sprint key while standing still (e.g. mid
+            // conversation, looking at a map) shouldn't drain stamina.
+            return controls != null && controls.Sprint && controls.TriesToMove ? 1f : 0f;
+        }
+
+        private void UpdateClimateMultiplier(float dt)
+        {
+            secondsSinceClimateCheck += dt;
+            if (secondsSinceClimateCheck < climateCheckIntervalSeconds)
+            {
+                return;
+            }
+            secondsSinceClimateCheck = 0f;
+
+            float temperature = entity.World.BlockAccessor
+                .GetClimateAt(entity.Pos.AsBlockPos, EnumGetClimateMode.NowValues)
+                .Temperature;
+
+            if (temperature <= hotClimateThresholdC)
+            {
+                climateDrainMultiplier = 1f;
+                return;
+            }
+
+            climateDrainMultiplier = isPlayer ? playerHotClimateDrainMultiplier : animalHotClimateDrainMultiplier;
         }
 
         private void UpdatePanicMode()

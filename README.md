@@ -20,9 +20,14 @@ This mod adds one, then compensates for the swing in difficulty in both directio
 - Every patched wild animal (and, optionally, players) gets a stamina pool
   (`EntityBehaviorStamina`), sized loosely by the creature's weight - a moose gets more stamina to
   burn than a hare.
-- Sprinting, fleeing, and swimming drain stamina. Wandering/foraging at normal pace does not.
+- Sprinting, fleeing, and swimming drain stamina. Wandering/foraging at normal pace does not, and
+  for players, just holding the sprint key while standing still doesn't either - only sprinting
+  while actually moving counts as exertion.
 - As stamina drops below a threshold, movement speed is throttled - it doesn't stop, it just can't
   keep sprinting indefinitely.
+- Hotter climates drain stamina faster while exerting. Four-legged animals overheat fast (they can
+  only cool themselves by panting) and get hit hard by this; players, who cool via sweating and are
+  comparatively built for endurance in heat (persistence hunting), only take a mild penalty.
 - Once stamina drops critically low, a chasing predator gives up and disengages instead of
   continuing to pursue (unless it was recently attacked and is defending itself, which is still
   allowed even while exhausted).
@@ -51,7 +56,8 @@ This mod adds one, then compensates for the swing in difficulty in both directio
 - **Stamina bar.** Players get a small statbar stacked 10px above the vanilla health bar, styled
   and positioned to match the vanilla HUD exactly (same width, same alignment math as the
   health/oxygen/food bars) rather than looking bolted-on. Only appears if player stamina is
-  actually active for you.
+  actually active for you, and hides itself while the oxygen bar is showing (same HUD slot,
+  and you can't sprint underwater anyway, so there's nothing useful to show there).
 - **Player stamina can be turned off.** `EnablePlayerStamina: false` in the config disables the
   player side of the mod entirely (no drain, no throttle, no HUD bar) while leaving wildlife
   stamina untouched.
@@ -71,9 +77,10 @@ hooked and why.
 
 ## Configuration
 
-On first run the mod writes `ModConfig/StaminaMod.json` with tunable defaults (drain/regen rates,
+On first run the mod writes `ModConfig/StaminaMod.json` with tunable defaults (drain/regen rates -
+tracked separately for animals vs. players via `DrainPerSecondAtSprint`/`PlayerDrainPerSecondAtSprint`,
 speed thresholds, exhaustion/give-up fractions, predator haste, panic burst, player pool size,
-sleep recharge threshold, etc). Individual entity types can also override most of these via a
+sleep recharge threshold, hot-climate thresholds/multipliers, etc). Individual entity types can also override most of these via a
 `"staminamod"` behavior attributes block if you want to hand-tune a specific creature - see
 `assets/staminamod/patches/wildlife-stamina.json` for how deer opt into panic mode this way.
 

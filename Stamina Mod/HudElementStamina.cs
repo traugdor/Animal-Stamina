@@ -106,10 +106,25 @@ namespace StaminaMod
 
         public override void OnRenderGUI(float deltaTime)
         {
-            if (capi.World.Player.WorldData.CurrentGameMode != EnumGameMode.Spectator)
+            if (capi.World.Player.WorldData.CurrentGameMode != EnumGameMode.Spectator && !IsOxygenBarVisible())
             {
                 base.OnRenderGUI(deltaTime);
             }
+        }
+
+        // Vanilla's own oxygen bar sits in this exact HUD slot (HideWhenFull, shown while
+        // underwater/short of breath) - and you can't sprint underwater anyway, so there's
+        // nothing useful for the stamina bar to show while it'd be competing for the same spot.
+        private bool IsOxygenBarVisible()
+        {
+            ITreeAttribute oxygenTree = capi.World.Player?.Entity?.WatchedAttributes?.GetTreeAttribute("oxygen");
+            if (oxygenTree == null)
+            {
+                return false;
+            }
+            float? current = oxygenTree.TryGetFloat("currentoxygen");
+            float? max = oxygenTree.TryGetFloat("maxoxygen");
+            return current.HasValue && max.HasValue && current.Value < max.Value;
         }
 
         protected override void OnFocusChanged(bool on)
