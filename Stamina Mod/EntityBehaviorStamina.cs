@@ -264,11 +264,17 @@ namespace StaminaMod
             }
             secondsSinceClimateCheck = 0f;
 
-            float temperature = entity.World.BlockAccessor
-                .GetClimateAt(entity.Pos.AsBlockPos, EnumGetClimateMode.NowValues)
-                .Temperature;
+            // Can return null (e.g. the entity's chunk is unloading, which is exactly when this
+            // was observed crashing in the wild - vanilla's own equivalent call in
+            // AiTaskSeekEntity has this same gap, unguarded). Keep whatever multiplier was last
+            // computed rather than throwing; it'll be re-checked next interval regardless.
+            ClimateCondition climate = entity.World.BlockAccessor.GetClimateAt(entity.Pos.AsBlockPos, EnumGetClimateMode.NowValues);
+            if (climate == null)
+            {
+                return;
+            }
 
-            if (temperature <= hotClimateThresholdC)
+            if (climate.Temperature <= hotClimateThresholdC)
             {
                 climateDrainMultiplier = 1f;
                 return;
