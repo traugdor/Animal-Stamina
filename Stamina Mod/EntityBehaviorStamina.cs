@@ -264,11 +264,24 @@ namespace StaminaMod
             }
             secondsSinceClimateCheck = 0f;
 
-            // Can return null (e.g. the entity's chunk is unloading, which is exactly when this
-            // was observed crashing in the wild - vanilla's own equivalent call in
-            // AiTaskSeekEntity has this same gap, unguarded). Keep whatever multiplier was last
-            // computed rather than throwing; it'll be re-checked next interval regardless.
-            ClimateCondition climate = entity.World.BlockAccessor.GetClimateAt(entity.Pos.AsBlockPos, EnumGetClimateMode.NowValues);
+            // GetClimateAt can both return null (e.g. the entity's chunk unloading - vanilla's
+            // own equivalent call in AiTaskSeekEntity has this same gap, unguarded) and throw
+            // from inside the call itself: internally it does a plain (non-concurrent)
+            // Dictionary.TryGetValue against the server's loaded-regions/chunks map, with no
+            // synchronization visible against whatever thread a chunk pregen run mutates that
+            // same map on. A null-check on the return value can't catch a race that throws
+            // before ever returning, so the whole query is wrapped defensively - this is a minor
+            // gameplay nicety, not correctness-critical, so on any failure we just keep the last
+            // known multiplier and retry next interval rather than let it take the entity down.
+            ClimateCondition climate;
+            try
+            {
+                climate = entity.World.BlockAccessor.GetClimateAt(entity.Pos.AsBlockPos, EnumGetClimateMode.NowValues);
+            }
+            catch
+            {
+                return;
+            }
             if (climate == null)
             {
                 return;
