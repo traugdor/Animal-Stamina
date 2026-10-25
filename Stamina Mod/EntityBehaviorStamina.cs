@@ -264,15 +264,11 @@ namespace StaminaMod
             }
             secondsSinceClimateCheck = 0f;
 
-            // GetClimateAt can both return null (e.g. the entity's chunk unloading - vanilla's
-            // own equivalent call in AiTaskSeekEntity has this same gap, unguarded) and throw
-            // from inside the call itself: internally it does a plain (non-concurrent)
-            // Dictionary.TryGetValue against the server's loaded-regions/chunks map, with no
-            // synchronization visible against whatever thread a chunk pregen run mutates that
-            // same map on. A null-check on the return value can't catch a race that throws
-            // before ever returning, so the whole query is wrapped defensively - this is a minor
-            // gameplay nicety, not correctness-critical, so on any failure we just keep the last
-            // known multiplier and retry next interval rather than let it take the entity down.
+            // GetClimateAt can return null (e.g. the entity's chunk is unloading) or throw from
+            // inside the call itself - it does an unsynchronized dictionary read against the
+            // server's loaded chunk/region maps, which a concurrent chunk pregen run can be
+            // mutating. This is a minor gameplay nicety, not correctness-critical, so any
+            // failure just keeps the last known multiplier and retries next interval.
             ClimateCondition climate;
             try
             {

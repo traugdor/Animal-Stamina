@@ -145,11 +145,9 @@ namespace StaminaMod
 
             if (disabled)
             {
-                // Player stamina is off, but they may have leftover synced attributes from a
-                // previous session where it was on (e.g. server admin just disabled it). Since we
-                // never attach the behavior in that case, nothing else would ever clear these -
-                // and the client HUD keys its visibility off "staminaModMax" existing at all, so a
-                // stale value here means a frozen stamina bar that refuses to disappear.
+                // Nothing else clears these if the behavior was previously attached, and the
+                // client HUD's visibility keys off "staminaModMax" existing at all - leftover
+                // data here would mean a bar that never disappears.
                 ITreeAttribute attrs = entity.WatchedAttributes;
                 if (attrs.HasAttribute("staminaModCurrent") || attrs.HasAttribute("staminaModMax"))
                 {
